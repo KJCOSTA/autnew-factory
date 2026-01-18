@@ -1,1 +1,3 @@
-streamlitpandasplotlymoviepy
+streamlit
+pandas
+plotly
