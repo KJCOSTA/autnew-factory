@@ -2,404 +2,373 @@ import streamlit as st
 import time
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
-import datetime
 
-# --- LOG DE VERSÃO (RODAPÉ) ---
-VERSION_INFO = "AutNew V1 [Dark Premium] - Atualização: 18/01/2026 - 19h15 | UX/UI Blue Tech"
+# --- LOG DE VERSÃO ---
+VERSION_INFO = "AutNew OS v2.0 | UI/UX Premium | Atualizado: 18/01/2026 - 19h30"
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(
-    page_title="AutNew Factory | Studio AI",
+    page_title="AutNew Factory",
     page_icon="💠",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# --- CSS PREMIUM: DARK BLUE THEME & UX ---
+# --- CSS AVANÇADO (A MÁGICA VISUAL) ---
 st.markdown("""
 <style>
-    /* IMPORTANDO FONTS */
+    /* 1. FONTES MODERNAS */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400&display=swap');
 
-    /* VARIÁVEIS DE TEMA (DARK BLUE TECH) */
     :root {
         --bg-dark: #0f172a;
         --card-bg: #1e293b;
-        --primary-blue: #3b82f6;
-        --accent-cyan: #06b6d4;
+        --primary: #3b82f6;
+        --primary-hover: #2563eb;
         --text-main: #f8fafc;
-        --text-dim: #94a3b8;
-        --success: #10b981;
-        --gradient-btn: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        --gradient-card: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.7) 100%);
+        --text-muted: #94a3b8;
+        --border: #334155;
     }
 
-    /* ESTILO GERAL DO CORPO */
+    /* 2. RESET GERAL */
     .stApp {
         background-color: var(--bg-dark);
-        background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 70%);
-        color: var(--text-main);
         font-family: 'Inter', sans-serif;
+        color: var(--text-main);
+    }
+    
+    /* 3. MENU LATERAL PERSONALIZADO (SEM BOLINHAS) */
+    section[data-testid="stSidebar"] {
+        background-color: #020617;
+        border-right: 1px solid var(--border);
+    }
+    
+    /* Esconder o estilo padrão do Radio Button */
+    .stRadio > label { display: none; }
+    div[role="radiogroup"] > label > div:first-child { display: none; }
+    
+    /* Estilizar as opções do menu como Botões de Navegação */
+    div[role="radiogroup"] label {
+        background: transparent;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 4px;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+        cursor: pointer;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+    
+    div[role="radiogroup"] label:hover {
+        background: rgba(59, 130, 246, 0.1);
+        color: white;
+    }
+    
+    /* Item Selecionado */
+    div[role="radiogroup"] label[data-checked="true"] {
+        background: var(--primary);
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        border: none;
     }
 
-    h1, h2, h3 {
-        color: white !important;
-        font-weight: 800 !important;
-        letter-spacing: -0.5px;
-    }
-
-    /* --- CONTAINERS & CARDS (GLASSMORPHISM) --- */
+    /* 4. CARDS & CONTAINERS */
     .custom-card {
         background: var(--card-bg);
-        border: 1px solid #334155;
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-        margin-bottom: 24px;
-        transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-    .custom-card:hover {
-        border-color: var(--primary-blue);
-        transform: translateY(-2px);
-    }
-
-    /* --- BOTÕES (HIERARQUIA CLARA) --- */
-    /* Primário: Gradiente Azul */
-    div[data-testid="stHorizontalBlock"] button[kind="primary"] {
-        background: var(--gradient-btn) !important;
-        border: none !important;
-        color: white !important;
-        font-weight: 600 !important;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 0.7rem 1.5rem !important;
-        border-radius: 8px !important;
-        box-shadow: 0 0 15px rgba(59, 130, 246, 0.4) !important;
-        transition: all 0.3s ease !important;
-    }
-    div[data-testid="stHorizontalBlock"] button[kind="primary"]:hover {
-        box-shadow: 0 0 25px rgba(59, 130, 246, 0.6) !important;
-        transform: scale(1.02);
-    }
-
-    /* Secundário: Outline */
-    div[data-testid="stHorizontalBlock"] button[kind="secondary"] {
-        background: transparent !important;
-        border: 1px solid #475569 !important;
-        color: var(--text-dim) !important;
-    }
-    div[data-testid="stHorizontalBlock"] button[kind="secondary"]:hover {
-        border-color: var(--text-main) !important;
-        color: white !important;
-    }
-
-    /* --- INPUTS & TEXT AREAS --- */
-    .stTextInput > div > div > input, .stTextArea > div > div > textarea {
-        background-color: #0f172a !important;
-        color: white !important;
-        border: 1px solid #334155 !important;
-        border-radius: 8px;
-    }
-    .stTextInput > div > div > input:focus, .stTextArea > div > div > textarea:focus {
-        border-color: var(--primary-blue) !important;
-        box-shadow: 0 0 0 1px var(--primary-blue) !important;
-    }
-
-    /* --- TIMELINE DE PROGRESSO (NEON) --- */
-    .progress-container {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 40px;
-        background: #1e293b;
-        padding: 15px;
+        border: 1px solid var(--border);
         border-radius: 12px;
-        border: 1px solid #334155;
-    }
-    .step-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: #64748b;
-    }
-    .step-item.active {
-        color: var(--primary-blue);
-        text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-    }
-    .step-item.completed {
-        color: var(--success);
-    }
-    .step-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background-color: #334155;
-    }
-    .step-item.active .step-dot {
-        background-color: var(--primary-blue);
-        box-shadow: 0 0 8px var(--primary-blue);
-    }
-    .step-item.completed .step-dot {
-        background-color: var(--success);
-    }
-
-    /* --- ALERTA DE SIMULAÇÃO (MODERNO) --- */
-    .sim-mode-badge {
-        display: inline-block;
-        background: rgba(245, 158, 11, 0.1);
-        color: #fbbf24;
-        border: 1px solid #fbbf24;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: bold;
+        padding: 24px;
         margin-bottom: 20px;
     }
+    
+    /* 5. BOTÕES DE AÇÃO (HIERARQUIA) */
+    div[data-testid="stHorizontalBlock"] button[kind="primary"] {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        transition: transform 0.1s;
+    }
+    div[data-testid="stHorizontalBlock"] button[kind="primary"]:active {
+        transform: scale(0.98);
+    }
 
-    /* Esconder elementos padrão */
+    /* 6. INPUTS MODERNOS */
+    input[type="text"], textarea {
+        background-color: #020617 !important;
+        border: 1px solid var(--border) !important;
+        color: white !important;
+        border-radius: 8px !important;
+    }
+    
+    /* 7. TIMELINE DE PROGRESSO */
+    .step-container {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        padding: 0 10px;
+    }
+    .step {
+        text-align: center;
+        position: relative;
+        flex: 1;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .step.active { color: var(--primary); }
+    .step.completed { color: #10b981; }
+    .step-icon {
+        width: 30px; height: 30px;
+        background: var(--card-bg);
+        border: 2px solid var(--border);
+        border-radius: 50%;
+        margin: 0 auto 8px;
+        display: flex; align-items: center; justify-content: center;
+        z-index: 2; position: relative;
+    }
+    .step.active .step-icon {
+        border-color: var(--primary);
+        background: rgba(59, 130, 246, 0.1);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    .step.completed .step-icon {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+    
+    /* Conector da linha */
+    .step::after {
+        content: '';
+        position: absolute;
+        top: 15px;
+        left: 50%;
+        width: 100%;
+        height: 2px;
+        background: var(--border);
+        z-index: 1;
+    }
+    .step:last-child::after { display: none; }
+    .step.completed::after { background: #10b981; }
+
+    /* UTILS */
+    .sim-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.4);
+        color: #fbbf24;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+    }
+    
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
-    
 </style>
 """, unsafe_allow_html=True)
 
-# --- GESTÃO DE ESTADO (SESSION STATE) ---
-if 'phase' not in st.session_state:
-    st.session_state.phase = 1
-if 'data' not in st.session_state:
-    st.session_state.data = {"url": "", "intent": ""}
-if 'generated_options' not in st.session_state:
-    st.session_state.generated_options = []
+# --- ESTADO (SESSION STATE) ---
+if 'phase' not in st.session_state: st.session_state.phase = 1
+if 'data' not in st.session_state: st.session_state.data = {}
+if 'options' not in st.session_state: st.session_state.options = []
 
-# --- COMPONENTES UI ---
-
+# --- COMPONENTE: TIMELINE ---
 def render_timeline(current):
-    steps = ["Gatilhos", "Inteligência", "Criação", "Montagem", "Entrega"]
+    steps = ["INPUT", "INTELIGÊNCIA", "CRIAÇÃO", "MONTAGEM", "EXPORT"]
     
-    st.markdown('<div class="progress-container">', unsafe_allow_html=True)
-    cols = st.columns(len(steps))
-    
-    for i, step in enumerate(steps):
-        phase_num = i + 1
+    html = '<div class="step-container">'
+    for i, label in enumerate(steps):
+        phase = i + 1
         status = ""
-        icon = "○"
+        icon = str(phase)
         
-        if phase_num < current:
+        if phase < current:
             status = "completed"
-            icon = "●"
-        elif phase_num == current:
+            icon = "✓"
+        elif phase == current:
             status = "active"
-            icon = "◉"
-            
-        with cols[i]:
-            st.markdown(f"""
-            <div class="step-item {status}" style="justify-content: center;">
-                <div class="step-dot"></div>
-                <span>{step}</span>
-            </div>
-            """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+        
+        html += f"""
+        <div class="step {status}">
+            <div class="step-icon">{icon}</div>
+            <div>{label}</div>
+        </div>
+        """
+    html += '</div>'
+    st.markdown(html, unsafe_allow_html=True)
 
-def section_header(title, subtitle):
-    st.markdown(f"""
-    <div style="margin-bottom: 20px;">
-        <h2 style="margin-bottom: 5px;">{title}</h2>
-        <p style="color: #94a3b8; font-size: 0.9rem;">{subtitle}</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-# --- BARRA LATERAL ---
+# --- SIDEBAR (MENU "NATIVO") ---
 with st.sidebar:
     st.markdown("""
-    <div style="text-align: center; padding: 20px 0;">
-        <h1 style="font-size: 1.5rem; margin:0;">💠 AutNew</h1>
-        <p style="color:#64748b; font-size: 0.8rem; letter-spacing: 2px;">FACTORY OS</p>
-    </div>
+        <div style="padding: 10px 0 20px 0;">
+            <h2 style="margin:0; color:white; font-size:1.4rem;">💠 AutNew</h2>
+            <p style="margin:0; color:#64748b; font-size:0.8rem; letter-spacing:1px;">PRO STUDIO</p>
+        </div>
     """, unsafe_allow_html=True)
     
-    menu = st.radio("NAVEGAÇÃO", ["🏭 Plan Run", "📜 Diretrizes", "⚙️ Build Plan", "📊 Monitor", "📺 Canal"], label_visibility="collapsed")
+    # Menu estilizado via CSS para parecer lista
+    menu = st.radio(
+        "Navegação",
+        ["🏭  Fábrica de Vídeo", "⚙️  Configurações", "📊  Monitoramento", "📜  Diretrizes", "📺  Canal"],
+        label_visibility="collapsed"
+    )
     
     st.markdown("---")
-    st.markdown("### 📡 Status")
     
-    # Status Card
+    # Status Card Compacto
     st.markdown("""
-    <div style="background:#1e293b; padding:12px; border-radius:8px; border:1px solid #334155;">
-        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-            <span style="font-size:0.8rem; color:#94a3b8;">API Gateway</span>
-            <span style="font-size:0.8rem; color:#10b981;">● Online</span>
+    <div style="background:#0f172a; padding:15px; border-radius:12px; border:1px solid #334155;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <span style="font-size:0.75rem; color:#94a3b8; font-weight:600;">COTA MENSAL</span>
+            <span style="font-size:0.75rem; color:#fff;">85%</span>
         </div>
-        <div style="background:#0f172a; height:4px; width:100%; border-radius:2px;">
-            <div style="background:#3b82f6; height:4px; width:80%; border-radius:2px;"></div>
+        <div style="background:#1e293b; height:6px; border-radius:3px; overflow:hidden;">
+            <div style="background:#3b82f6; width:85%; height:100%;"></div>
+        </div>
+        <div style="margin-top:10px; font-size:0.7rem; color:#64748b;">
+            ● OpenAI: <span style="color:#10b981;">Online</span><br>
+            ● YouTube: <span style="color:#fbbf24;">Simulado</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("---")
-    st.caption(VERSION_INFO)
+    st.markdown(f"<div style='margin-top:30px; font-size:0.65rem; color:#475569; text-align:center;'>{VERSION_INFO}</div>", unsafe_allow_html=True)
 
-# --- LÓGICA PRINCIPAL ---
+# --- ÁREA PRINCIPAL ---
 
-if menu == "🏭 Plan Run":
+if menu == "🏭  Fábrica de Vídeo":
     
-    # Cabeçalho Global da Área de Trabalho
-    st.markdown('<span class="sim-mode-badge">⚡ MODO SIMULAÇÃO (TESTE)</span>', unsafe_allow_html=True)
+    # Header da Área de Trabalho
+    st.markdown('<div class="sim-badge">AMBIENTE DE SIMULAÇÃO</div>', unsafe_allow_html=True)
     render_timeline(st.session_state.phase)
     
-    # --- FASE 1: GATILHOS (INPUT) ---
+    # --- FASE 1: INPUT ---
     if st.session_state.phase == 1:
-        section_header("Configuração da Produção", "Defina os inputs para ativar os agentes neurais.")
+        st.markdown("### 🚀 Configuração da Produção")
+        st.markdown("Defina os parâmetros iniciais para ativar a esteira de automação.")
         
         col1, col2 = st.columns(2)
-        
         with col1:
             st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-            st.markdown("### 📥 Fonte de Dados")
-            url = st.text_input("🔗 URL do Concorrente", placeholder="Cole o link do YouTube aqui...")
-            file = st.file_uploader("📂 Planilha DNA (Histórico)", type=['csv','xlsx'])
-            
-            if file:
-                st.success("Arquivo indexado com sucesso.")
+            st.markdown("**1. Fonte de Dados**")
+            url = st.text_input("URL do Concorrente", placeholder="Cole o link do YouTube...")
+            st.file_uploader("Histórico do Canal (DNA)", type=['csv'])
             st.markdown('</div>', unsafe_allow_html=True)
             
         with col2:
             st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-            st.markdown("### 🎯 Intenção do Vídeo")
-            intent = st.text_area("Objetivo Estratégico", height=145, placeholder="Descreva o tema, o sentimento desejado e o público-alvo...")
+            st.markdown("**2. Estratégia**")
+            intent = st.text_area("Intenção do Vídeo", height=132, placeholder="Qual o tema e o sentimento desejado?")
             st.caption("A IA usará isso para calibrar o tom emocional.")
             st.markdown('</div>', unsafe_allow_html=True)
             
-        # Ação Principal
-        col_space, col_btn = st.columns([2, 1])
-        with col_btn:
+        # Ação
+        c1, c2, c3 = st.columns([1, 2, 1])
+        with c3:
             if st.button("INICIAR PROCESSAMENTO ⚡", type="primary", use_container_width=True):
-                if not url and not intent:
-                    st.toast("⚠️ Preencha os campos para continuar.", icon="⚠️")
-                else:
-                    with st.spinner("Acionando agentes de mineração..."):
-                        time.sleep(1.5)
-                        st.session_state.data['url'] = url
-                        st.session_state.data['intent'] = intent
-                        st.session_state.phase = 2
-                        st.rerun()
+                with st.spinner("Inicializando agentes de mineração..."):
+                    time.sleep(1.5)
+                    st.session_state.phase = 2
+                    st.rerun()
 
-    # --- FASE 2: INTELIGÊNCIA (BLACK BOX) ---
+    # --- FASE 2: INTELIGÊNCIA ---
     elif st.session_state.phase == 2:
-        section_header("Processamento Neural", "Os agentes estão analisando dados e gerando insights.")
+        st.markdown("### 🧠 Processamento Neural")
         
         col1, col2 = st.columns([1, 2])
-        
         with col1:
             st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-            st.markdown("### 📠 Logs do Sistema")
-            
-            with st.status("Executando Pipeline...", expanded=True) as status:
-                st.write("🔍 Minerador: Extraindo texto da URL...")
+            st.markdown("**Logs de Execução**")
+            with st.status("Trabalhando...", expanded=True) as status:
+                st.write("🔍 Minerando texto da URL...")
                 time.sleep(1)
-                st.write("🧬 Analista: Cruzando dados de retenção...")
+                st.write("🧬 Analisando DNA do Canal...")
                 time.sleep(1)
-                st.write("✨ Criativo: Gerando 3 variações...")
-                status.update(label="Processamento Concluído!", state="complete", expanded=False)
-            
-            st.success("14.500 Tokens processados.")
+                st.write("✨ Gerando 3 estratégias...")
+                status.update(label="Completo!", state="complete", expanded=False)
+            st.success("Dados extraídos com sucesso.")
             st.markdown('</div>', unsafe_allow_html=True)
             
         with col2:
             st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-            st.markdown("### 📊 DNA do Canal (Retenção)")
-            
-            # Gráfico Dark Premium
-            df = pd.DataFrame({"Tema": ["Oração", "Salmos", "Mensagem"], "Retenção": [65, 55, 40]})
-            fig = px.bar(df, x="Tema", y="Retenção", color="Retenção", 
-                         color_continuous_scale=["#1e293b", "#3b82f6"])
-            
-            fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#94a3b8',
-                height=250,
-                margin=dict(t=0, b=0, l=0, r=0)
-            )
+            st.markdown("**Análise de DNA (Retenção)**")
+            # Gráfico Plotly
+            df = pd.DataFrame({"Tema": ["Oração", "Salmos", "Mensagem"], "Retenção": [65, 50, 40]})
+            fig = px.bar(df, x="Tema", y="Retenção", color="Retenção", color_continuous_scale=["#1e293b", "#3b82f6"])
+            fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#94a3b8", height=200, margin=dict(l=0,r=0,t=0,b=0))
             st.plotly_chart(fig, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
             
-        col_space, col_btn = st.columns([3, 1])
-        with col_btn:
-            if st.button("VISUALIZAR ESTRATÉGIAS ➡️", type="primary", use_container_width=True):
-                # Gerar Mocks
-                if not st.session_state.generated_options:
-                    st.session_state.generated_options = [
-                        {"t": "A Oração que Quebra Cadeias", "p": "Close-up rosto idoso, luz divina azul neon."},
-                        {"t": "Salmo 91: Segredo Oculto", "p": "Bíblia aberta na mesa, aura de proteção."},
-                        {"t": "Sente Angústia? Prece Rápida", "p": "Silhueta saindo do túnel escuro para luz."}
-                    ]
+        c1, c2, c3 = st.columns([1, 2, 1])
+        with c3:
+            if st.button("VER ESTRATÉGIAS ➡️", type="primary", use_container_width=True):
+                # Mock Data Generation
+                st.session_state.options = [
+                    {"t": "A Oração que Quebra Cadeias", "p": "Rosto idoso, luz divina azul neon."},
+                    {"t": "Salmo 91: Segredo Oculto", "p": "Bíblia aberta, aura de proteção."},
+                    {"t": "Sente Angústia? Prece Rápida", "p": "Silhueta saindo do túnel."}
+                ]
                 st.session_state.phase = 3
                 st.rerun()
 
-    # --- FASE 3: DECISÃO CRIATIVA ---
+    # --- FASE 3: DECISÃO ---
     elif st.session_state.phase == 3:
-        section_header("Estúdio de Criação", "Compare as estratégias e aprove o roteiro final.")
+        st.markdown("### 🎨 Estúdio Criativo")
         
-        # Grid de Opções
         cols = st.columns(3)
-        for i, opt in enumerate(st.session_state.generated_options):
+        for i, opt in enumerate(st.session_state.options):
             with cols[i]:
                 st.markdown(f'<div class="custom-card">', unsafe_allow_html=True)
-                st.markdown(f"**OPÇÃO 0{i+1}**")
-                st.markdown("---")
+                st.markdown(f"<small style='color:#3b82f6'>OPÇÃO 0{i+1}</small>", unsafe_allow_html=True)
+                st.text_area("Título", value=opt['t'], key=f"t{i}", height=70)
+                st.text_area("Prompt Visual", value=opt['p'], key=f"p{i}", height=100)
                 
-                new_t = st.text_area("Título", value=opt['t'], key=f"t{i}", height=70)
-                new_p = st.text_area("Prompt Visual", value=opt['p'], key=f"p{i}", height=100)
-                
-                c1, c2 = st.columns(2)
-                if c1.button("🖼️ Preview", key=f"prev{i}"):
-                    st.image(f"https://source.unsplash.com/random/400x225?tech&sig={i}", caption="Mockup IA")
-                
-                if c2.button("✅ Escolher", key=f"sel{i}", type="secondary"):
-                    st.toast(f"Opção {i+1} marcada como favorita.", icon="🌟")
-                
+                c_a, c_b = st.columns(2)
+                if c_a.button("🖼️ Gerar", key=f"g{i}"):
+                    st.image(f"https://source.unsplash.com/random/400x225?tech&sig={i}")
+                if c_b.button("✅ Escolher", key=f"s{i}"):
+                    st.toast(f"Opção {i+1} selecionada!")
                 st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Editor de Roteiro
+                
         st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-        st.markdown("### 📝 Roteiro Verbatim (1.600 Palavras)")
-        st.text_area("Editor Full-Screen", value="[ABERTURA MAGNÉTICA]\nAmado irmão... (Texto completo editável)", height=300, label_visibility="collapsed")
+        st.markdown("**Editor de Roteiro (1.600 palavras)**")
+        st.text_area("Texto Verbatim", value="[ABERTURA]\nAmado irmão... (Texto completo editável)", height=200, label_visibility="collapsed")
         st.markdown('</div>', unsafe_allow_html=True)
         
-        col_space, col_btn = st.columns([3, 1])
-        with col_btn:
+        c1, c2, c3 = st.columns([1, 2, 1])
+        with c3:
             if st.button("APROVAR E MONTAR 🎬", type="primary", use_container_width=True):
-                with st.spinner("Congelando ativos e renderizando cenas..."):
+                with st.spinner("Renderizando cenas..."):
                     time.sleep(2)
                     st.session_state.phase = 4
                     st.rerun()
 
     # --- FASE 4: MONTAGEM ---
     elif st.session_state.phase == 4:
-        section_header("Linha de Montagem", "Revise a segmentação de cenas antes do render final.")
+        st.markdown("### 🎞️ Estúdio de Montagem")
+        st.info("A IA segmentou seu roteiro. Revise os ativos antes do render final.")
         
-        # Lista de Cenas
-        scenes = [
-            {"id":1, "txt":"Amado irmão, se acordou com o coração apertado...", "type":"Stock Video"},
-            {"id":2, "txt":"Esta oração encontrou você no momento certo.", "type":"IA Image"},
-            {"id":3, "txt":"Vamos clamar a providência do Salmo 23.", "type":"Stock Video"}
-        ]
-        
-        for scene in scenes:
-            with st.expander(f"Cena 0{scene['id']} | 00:0{scene['id']*5}s", expanded=True):
+        for i in range(1, 4):
+            with st.expander(f"Cena 0{i} | 00:0{i*5}s", expanded=True):
                 c1, c2, c3 = st.columns([3, 1, 1])
-                c1.text_area("Narração", value=scene['txt'], height=70, key=f"s{scene['id']}", label_visibility="collapsed")
-                c2.info(f"Visual: {scene['type']}")
-                c3.button("🔄 Trocar", key=f"swap{scene['id']}")
-
-        col_space, col_btn = st.columns([3, 1])
-        with col_btn:
+                c1.text_area("Narração", value="Texto da narração...", height=70, key=f"c{i}", label_visibility="collapsed")
+                c2.info("Visual: Stock Video")
+                c3.button("🔄 Trocar", key=f"sw{i}")
+        
+        c1, c2, c3 = st.columns([1, 2, 1])
+        with c3:
             if st.button("RENDERIZAR FINAL 🎥", type="primary", use_container_width=True):
-                with st.spinner("Renderizando MP4 (Isso pode levar alguns segundos)..."):
+                with st.spinner("Processando vídeo (MP4)..."):
                     time.sleep(3)
                     st.session_state.phase = 5
                     st.rerun()
@@ -407,36 +376,29 @@ if menu == "🏭 Plan Run":
     # --- FASE 5: ENTREGA ---
     elif st.session_state.phase == 5:
         st.balloons()
-        st.markdown(f"""
-        <div style="text-align:center; margin-bottom:30px;">
-            <h1 style="color:#10b981 !important;">Vídeo Finalizado!</h1>
-            <p style="color:#94a3b8;">O arquivo foi gerado e está pronto para distribuição.</p>
-        </div>
-        """, unsafe_allow_html=True)
         
         col1, col2 = st.columns([2, 1])
         with col1:
             st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-            st.image("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000", caption="Video_Final_Render_1080p.mp4")
+            st.image("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800", caption="Video_Final.mp4")
             st.markdown('</div>', unsafe_allow_html=True)
             
         with col2:
             st.markdown('<div class="custom-card">', unsafe_allow_html=True)
             st.markdown("### 📦 Exportar")
             st.button("⬇️ Baixar MP4", use_container_width=True)
-            st.button("🔴 Publicar no YouTube", type="primary", use_container_width=True)
-            st.warning("⚠️ Atenção: A publicação via API é irreversível.")
+            st.button("🔴 Publicar YouTube", type="primary", use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
             
-            if st.button("🔄 Iniciar Novo Ciclo"):
+            if st.button("🔄 Novo Projeto"):
                 st.session_state.phase = 1
                 st.rerun()
 
 # --- OUTRAS TELAS ---
-elif menu == "📜 Diretrizes":
+elif menu == "📜  Diretrizes":
     st.title("Gestão de Diretrizes")
-    st.info("Aqui você gerencia o 'Cérebro' do canal (Lista Negra, Regras de Design, etc).")
+    st.info("Configuração do 'Cérebro' do canal.")
 
-elif menu == "📊 Monitor":
+elif menu == "📊  Monitoramento":
     st.title("Monitor de Recursos")
-    st.warning("Conecte suas chaves de API para ver o consumo em tempo real.")
+    st.warning("Conecte suas chaves para ver dados reais.")
