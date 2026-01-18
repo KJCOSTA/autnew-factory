@@ -5,7 +5,8 @@ import plotly.express as px
 import datetime
 
 # --- LOG DE VERSÃO (RODAPÉ) ---
-VERSION_INFO = "AutNew V1 - Atualização nº0001 - 18/01/2026 - 16h40 | UI/UX Premium + Feedback Visual"
+# Atualizado com o horário real da modificação
+VERSION_INFO = "AutNew V1 - Atualização nº0001 - 18/01/2026 - 18h04 | UI/UX Premium + Feedback Visual"
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(
