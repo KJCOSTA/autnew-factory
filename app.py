@@ -5,7 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # --- LOG DE VERSÃO (RODAPÉ) ---
-VERSION_INFO = "AutNew V1 [Dark Blue Premium] - Atualização: 18/01/2026 - 19h15 | UX/UI High-End"
+VERSION_INFO = "AutNew V1 [Dark Blue Premium] - Fix: 18/01/2026 - 22h30 | Menu Restaurado"
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(
@@ -162,8 +162,11 @@ st.markdown("""
         background-color: #020617;
         border-right: 1px solid #334155;
     }
-    /* Hack para estilizar o st.radio como lista de navegação */
-    .stRadio > label { display: none; }
+    
+    /* ESTILIZAÇÃO CRÍTICA DO MENU (RADIO) */
+    .stRadio > label { display: none !important; }
+    div[role="radiogroup"] > label > div:first-child { display: none !important; }
+    
     div[role="radiogroup"] label {
         background: transparent;
         padding: 10px 15px;
@@ -172,17 +175,23 @@ st.markdown("""
         border: 1px solid transparent;
         transition: all 0.2s;
         cursor: pointer;
-        color: #94a3b8;
+        color: #94a3b8 !important;
+        display: flex;
+        width: 100%;
     }
     div[role="radiogroup"] label:hover {
         background: rgba(59, 130, 246, 0.1);
-        color: white;
+        color: white !important;
     }
     div[role="radiogroup"] label[data-checked="true"] {
         background: var(--primary-blue);
-        color: white;
+        color: white !important;
         box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
         border: none;
+    }
+    div[role="radiogroup"] label p {
+        font-weight: 500;
+        margin: 0;
     }
 
     /* Esconder elementos padrão */
